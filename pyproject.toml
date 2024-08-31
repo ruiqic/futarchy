@@ -1,0 +1,19 @@
+[project]
+name = "futarchy"
+version = "0.1.0"
+description = "A Python SDK for Futarchy"
+authors = [{ name = "Rui Qi Chen", email = "ruiqic@gatech.edu" }]
+license = {text = "MIT"}
+readme = "README.md"
+
+dependencies = [
+    "anchorpy>=0.20.1",
+    "solana>=0.34.0",
+    "solders>=0.21.0",
+    "borsh-construct>=0.1.0"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
