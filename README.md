@@ -40,7 +40,7 @@ client = ProposalClient(
 Initialize client with relevant addresses and make token accounts
 ```python
 await client.get_proposal_info()
-await client.create_conditional_token_accounts()
+await client.create_token_accounts()
 ```
 
 Example mint, trade, and merge

@@ -89,12 +89,14 @@ class ProposalClient:
         self.quote_fail_token_mint = quote_vault_account.conditional_on_revert_token_mint
         self.quote_precision = 10 ** quote_vault_account.decimals
 
-    async def create_conditional_token_accounts(self):
+    async def create_token_accounts(self):
         mints = [
             self.base_pass_token_mint,
             self.base_fail_token_mint,
             self.quote_pass_token_mint,
-            self.quote_fail_token_mint
+            self.quote_fail_token_mint,
+            self.base_underlying_token_mint,
+            self.quote_underlying_token_mint
         ]
         accounts = [get_associated_token_address(self.authority, mint) for mint in mints]
         account_statuses = await self.connection.get_multiple_accounts_json_parsed(accounts)
