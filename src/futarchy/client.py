@@ -13,7 +13,7 @@ from spl.token.constants import TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID
 from spl.token.instructions import get_associated_token_address, create_associated_token_account
 from anchorpy import Program, Context, Idl, Provider, Wallet
 from pathlib import Path
-from typing import Optional, Iterable, Union
+from typing import Optional, Iterable, Union, Tuple
 from enum import Enum
 
 import futarchy
@@ -169,7 +169,14 @@ class ProposalClient:
     def get_merge_quote_conditional_tokens_ix(self, amount: int) -> Instruction:
         return self.get_merge_conditional_tokens_ix(amount, TokenType.QUOTE)
 
-    def get_buy_ix(self, amount: int, outcome_type: OutcomeType, amm: Amm, slippage_bps: int = 10) -> Instruction:
+    def get_buy_ix(
+        self, 
+        amount: int, 
+        outcome_type: OutcomeType, 
+        amm: Amm, 
+        slippage_bps: int = 10,
+        return_min_out: bool = False
+    ) -> Union[Instruction, Tuple[Instruction, int]]:
         accounts = self.get_accounts_for_swap_ix(outcome_type, amm)
         min_output = get_output_tokens_buy(amount, amm, slippage_bps)
         swap_args = SwapArgs(SwapType.Buy(), amount, min_output)
@@ -177,9 +184,18 @@ class ProposalClient:
             swap_args,
             ctx=Context(accounts=accounts)
         )
+        if return_min_out:
+            return ix, min_output
         return ix
     
-    def get_sell_ix(self, amount: int, outcome_type: OutcomeType, amm: Amm, slippage_bps: int = 10) -> Instruction:
+    def get_sell_ix(
+        self, 
+        amount: int, 
+        outcome_type: OutcomeType, 
+        amm: Amm, 
+        slippage_bps: int = 10,
+        return_min_out: bool = False
+    ) -> Union[Instruction, Tuple[Instruction, int]]:
         accounts = self.get_accounts_for_swap_ix(outcome_type, amm)
         min_output = get_output_tokens_sell(amount, amm, slippage_bps)
         swap_args = SwapArgs(SwapType.Sell(), amount, min_output)
@@ -187,6 +203,8 @@ class ProposalClient:
             swap_args,
             ctx=Context(accounts=accounts)
         )
+        if return_min_out:
+            return ix, min_output
         return ix
 
     def get_accounts_for_swap_ix(self, outcome_type: OutcomeType, amm: Amm) -> dict:
@@ -217,25 +235,45 @@ class ProposalClient:
         }
         return accounts
 
-    async def get_buy_pass_ix(self, amount: int, amm: Optional[Amm] = None, slippage_bps: int = 10) -> Instruction:
+    async def get_buy_pass_ix(
+        self, amount: int, 
+        amm: Optional[Amm] = None, 
+        slippage_bps: int = 10, 
+        return_min_out: bool = False
+    ) -> Union[Instruction, Tuple[Instruction, int]]:
         if amm is None:
             amm = await get_amm_account(self.amm_program, self.pass_amm)
-        return self.get_buy_ix(amount, OutcomeType.PASS, amm, slippage_bps)
+        return self.get_buy_ix(amount, OutcomeType.PASS, amm, slippage_bps, return_min_out)
 
-    async def get_sell_pass_ix(self, amount: int, amm: Optional[Amm] = None, slippage_bps: int = 10) -> Instruction:
+    async def get_sell_pass_ix(
+        self, amount: int, 
+        amm: Optional[Amm] = None, 
+        slippage_bps: int = 10, 
+        return_min_out: bool = False
+    ) -> Union[Instruction, Tuple[Instruction, int]]:
         if amm is None:
             amm = await get_amm_account(self.amm_program, self.pass_amm)
-        return self.get_sell_ix(amount, OutcomeType.PASS, amm, slippage_bps)
+        return self.get_sell_ix(amount, OutcomeType.PASS, amm, slippage_bps, return_min_out)
 
-    async def get_buy_fail_ix(self, amount: int, amm: Optional[Amm] = None, slippage_bps: int = 10) -> Instruction:
+    async def get_buy_fail_ix(
+        self, amount: int, 
+        amm: Optional[Amm] = None, 
+        slippage_bps: int = 10, 
+        return_min_out: bool = False
+    ) -> Union[Instruction, Tuple[Instruction, int]]:
         if amm is None:
             amm = await get_amm_account(self.amm_program, self.fail_amm)
-        return self.get_buy_ix(amount, OutcomeType.FAIL, amm, slippage_bps)
+        return self.get_buy_ix(amount, OutcomeType.FAIL, amm, slippage_bps, return_min_out)
 
-    async def get_sell_fail_ix(self, amount: int, amm: Optional[Amm] = None, slippage_bps: int = 10) -> Instruction:
+    async def get_sell_fail_ix(
+        self, amount: int, 
+        amm: Optional[Amm] = None, 
+        slippage_bps: int = 10, 
+        return_min_out: bool = False
+    ) -> Union[Instruction, Tuple[Instruction, int]]:
         if amm is None:
             amm = await get_amm_account(self.amm_program, self.fail_amm)
-        return self.get_sell_ix(amount, OutcomeType.FAIL, amm, slippage_bps)
+        return self.get_sell_ix(amount, OutcomeType.FAIL, amm, slippage_bps, return_min_out)
     
     async def fetch_latest_blockhash(self) -> Hash:
         return (
