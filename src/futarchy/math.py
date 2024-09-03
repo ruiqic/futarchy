@@ -1,6 +1,6 @@
 from futarchy.types import Amm
 
-ONE_IN_PBS = 100 * 100
+MAX_BPS = 100 * 100
 FEE_BPS = 100
 
 def get_output_tokens_buy(in_quote_amount: int, amm: Amm, slippage_bps: int = 30):
@@ -18,9 +18,9 @@ def get_output_tokens_sell(in_base_amount: int, amm: Amm, slippage_bps: int = 30
     return int(min_output * 10 ** amm.quote_mint_decimals)
 
 def calculate_amm_output(in_base_amount, slippage_bps, input_reserves, output_reserves):
-    input_amount_with_fee = in_base_amount * (ONE_IN_PBS - FEE_BPS) / ONE_IN_PBS
+    input_amount_with_fee = in_base_amount * (MAX_BPS - FEE_BPS) / MAX_BPS
     numerator = input_amount_with_fee * output_reserves
     denominator = input_reserves + input_amount_with_fee
     expected_out = numerator / denominator
-    min_expected_out = expected_out * (ONE_IN_PBS - slippage_bps) / ONE_IN_PBS
+    min_expected_out = expected_out * (MAX_BPS - slippage_bps) / MAX_BPS
     return min_expected_out
