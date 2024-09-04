@@ -99,7 +99,7 @@ class ProposalClient:
             self.quote_underlying_token_mint
         ]
         accounts = [get_associated_token_address(self.authority, mint) for mint in mints]
-        account_statuses = await self.connection.get_multiple_accounts_json_parsed(accounts)
+        account_statuses = await self.connection.get_multiple_accounts_json_parsed(accounts, commitment=Confirmed)
         ixs = []
         for i, status in enumerate(account_statuses.value):
             if status is None or status.data.parsed["info"]["state"] != "initialized":
