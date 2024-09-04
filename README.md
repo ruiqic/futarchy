@@ -1,5 +1,5 @@
 # Futarchy Python SDK
-This unofficial Meta-DAO Futarchy Python SDK implements several basic functions for trading proposal markets. Currently supports minting, merging, buying, and selling conditional tokens.
+This unofficial Meta-DAO Futarchy Python SDK implements several basic functions for trading proposal markets. Currently supports minting, merging, buying, selling, and redeeming conditional tokens.
 
 Requires `python=3.10`. Clone and install:
 ```console
