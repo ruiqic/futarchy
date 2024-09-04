@@ -126,6 +126,13 @@ class ProposalClient:
             ctx=Context(accounts=accounts)
         )
         return ix
+    
+    def get_redeem_conditional_tokens_ix(self, token_type: TokenType) -> Instruction:
+        accounts = self.get_accounts_for_vault_ix(token_type)
+        ix = self.vault_program.instruction["redeem_conditional_tokens_for_underlying_tokens"](
+            ctx=Context(accounts=accounts)
+        )
+        return ix
 
     def get_accounts_for_vault_ix(self, token_type: TokenType) -> dict:
         if token_type == TokenType.BASE:
@@ -168,6 +175,12 @@ class ProposalClient:
     
     def get_merge_quote_conditional_tokens_ix(self, amount: int) -> Instruction:
         return self.get_merge_conditional_tokens_ix(amount, TokenType.QUOTE)
+    
+    def get_redeem_base_conditional_tokens_ix(self) -> Instruction:
+        return self.get_redeem_conditional_tokens_ix(TokenType.BASE)
+    
+    def get_redeem_quote_conditional_tokens_ix(self) -> Instruction:
+        return self.get_redeem_conditional_tokens_ix(TokenType.QUOTE)
 
     def get_buy_ix(
         self, 
