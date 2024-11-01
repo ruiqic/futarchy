@@ -10,7 +10,7 @@ from solana.rpc.types import TxOpts
 from solana.rpc.commitment import Processed, Confirmed
 from solders.compute_budget import set_compute_unit_limit, set_compute_unit_price
 from spl.token.constants import TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID
-from spl.token.instructions import get_associated_token_address, create_associated_token_account
+from spl.token.instructions import get_associated_token_address, create_associated_token_account, close_account, CloseAccountParams
 from anchorpy import Program, Context, Idl, Provider, Wallet
 from pathlib import Path
 from typing import Optional, Iterable, Union, Tuple
@@ -110,6 +110,24 @@ class ProposalClient:
                 ))
         if ixs:
             return await self.send_ix(ixs, compute_unit_limit=25_000 * len(ixs))
+        
+    async def close_conditional_token_accounts(self):
+        mints = [
+            self.base_pass_token_mint,
+            self.base_fail_token_mint,
+            self.quote_pass_token_mint,
+            self.quote_fail_token_mint,
+        ]
+        accounts = [get_associated_token_address(self.authority, mint) for mint in mints]
+        ixs = [self.get_redeem_base_conditional_tokens_ix(), self.get_redeem_quote_conditional_tokens_ix()]
+        for account in accounts:
+            ixs.append(close_account(CloseAccountParams(
+                program_id=TOKEN_PROGRAM_ID, 
+                account=account,
+                dest=self.authority,
+                owner=self.authority
+            )))
+        return await self.send_ix(ixs, compute_unit_limit=150_000)
 
     def get_mint_conditional_tokens_ix(self, amount: int, token_type: TokenType) -> Instruction:
         accounts = self.get_accounts_for_vault_ix(token_type)
