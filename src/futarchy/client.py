@@ -90,6 +90,11 @@ class ProposalClient:
         self.quote_precision = 10 ** quote_vault_account.decimals
 
     async def create_token_accounts(self):
+        ixs = await self.get_create_token_accounts_ixs()
+        if ixs:
+            return await self.send_ix(ixs, compute_unit_limit=25_000 * len(ixs))
+
+    async def get_create_token_accounts_ixs(self):
         mints = [
             self.base_pass_token_mint,
             self.base_fail_token_mint,
@@ -108,8 +113,7 @@ class ProposalClient:
                     self.authority, 
                     mints[i]
                 ))
-        if ixs:
-            return await self.send_ix(ixs, compute_unit_limit=25_000 * len(ixs))
+        return ixs
         
     async def close_conditional_token_accounts(self):
         mints = [
