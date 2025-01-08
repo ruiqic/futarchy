@@ -318,7 +318,7 @@ class ProposalClient:
     async def send_ix(
         self,
         ix : Union[Instruction, Iterable[Instruction]],
-        compute_unit_price: int = 10_000,
+        compute_unit_price: int = 100_000,
         compute_unit_limit: int = 50_000,
     ) -> Signature:
         compute_price_ix = set_compute_unit_price(compute_unit_price)
